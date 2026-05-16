@@ -1,0 +1,160 @@
+@startuml SGISI - Diagrama Entidad-Relación
+
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor White
+  BorderColor #2C6EA6
+  ArrowColor  #2C6EA6
+  FontSize 11
+}
+skinparam package {
+  BackgroundColor #F4F6F7
+  BorderColor     #AAB7B8
+  FontSize 11
+  FontStyle bold
+}
+
+' ─── Leyenda de marcadores ───────────────────────────────────
+' PK  = Clave primaria
+' FK  = Clave foránea
+' NN  = NOT NULL
+' UQ  = UNIQUE
+
+' ─── Tablas de referencia ────────────────────────────────────
+package "Catálogos" {
+
+  entity tipo_incidente {
+    * id          : TINYINT UNSIGNED <<PK>>
+    --
+    * nombre      : VARCHAR(50)  <<NN,UQ>>
+    * descripcion : VARCHAR(200) <<NN>>
+  }
+
+  entity severidad {
+    * id              : TINYINT UNSIGNED <<PK>>
+    --
+    * nombre          : VARCHAR(20) <<NN,UQ>>
+    * nivel_prioridad : TINYINT     <<NN,UQ>>
+  }
+
+  entity estado_incidente {
+    * id     : TINYINT UNSIGNED <<PK>>
+    --
+    * nombre : VARCHAR(30) <<NN,UQ>>
+  }
+}
+
+' ─── SLA ─────────────────────────────────────────────────────
+package "Control de SLA" {
+
+  entity configuracion_sla {
+    * id          : TINYINT UNSIGNED <<PK>>
+    --
+    * severidad_id : TINYINT UNSIGNED <<FK,UQ>>
+    * plazo_horas  : SMALLINT UNSIGNED <<NN>>
+      descripcion  : VARCHAR(100)
+  }
+}
+
+' ─── Usuarios ────────────────────────────────────────────────
+package "Gestión de Usuarios" {
+
+  entity usuario {
+    * id              : INT UNSIGNED <<PK>>
+    --
+    * nombre          : VARCHAR(100) <<NN>>
+    * apellido        : VARCHAR(100) <<NN>>
+    * email           : VARCHAR(150) <<NN,UQ>>
+      legajo          : VARCHAR(20)  <<UQ>>
+    * contrasena_hash : VARCHAR(255) <<NN>>
+    * rol             : ENUM('ANALISTA_SOC','SUPERVISOR_SEGURIDAD','ADMINISTRADOR') <<NN>>
+    * activo          : TINYINT(1)   <<NN>>
+    * fecha_creacion  : DATETIME     <<NN>>
+  }
+}
+
+' ─── Activos ─────────────────────────────────────────────────
+package "Activos" {
+
+  entity activo_afectado {
+    * id          : INT UNSIGNED <<PK>>
+    --
+    * nombre      : VARCHAR(150) <<NN>>
+    * tipo        : VARCHAR(80)  <<NN>>
+      descripcion : VARCHAR(300)
+  }
+}
+
+' ─── Incidente ───────────────────────────────────────────────
+package "Gestión de Incidentes" {
+
+  entity incidente {
+    * id                    : INT UNSIGNED <<PK>>
+    --
+    * tipo_id               : TINYINT UNSIGNED <<FK>>
+    * severidad_id          : TINYINT UNSIGNED <<FK>>
+    * estado_id             : TINYINT UNSIGNED <<FK>>
+    * activo_id             : INT UNSIGNED     <<FK>>
+      analista_id           : INT UNSIGNED     <<FK,NULL>>
+      supervisor_id         : INT UNSIGNED     <<FK,NULL>>
+    * descripcion           : TEXT             <<NN>>
+    * fecha_deteccion       : DATETIME         <<NN>>
+      fecha_asignacion      : DATETIME
+      fecha_cierre          : DATETIME
+    * fecha_vencimiento_sla : DATETIME         <<NN>>
+      motivo_escalada       : VARCHAR(300)
+  }
+}
+
+' ─── Evidencias ──────────────────────────────────────────────
+package "Evidencias" {
+
+  entity evidencia {
+    * id             : INT UNSIGNED <<PK>>
+    --
+    * incidente_id   : INT UNSIGNED <<FK>>
+    * analista_id    : INT UNSIGNED <<FK>>
+    * tipo_evidencia : VARCHAR(80)  <<NN>>
+    * descripcion    : TEXT         <<NN>>
+    * fecha_registro : DATETIME     <<NN>>
+  }
+}
+
+' ─── Bitácora ────────────────────────────────────────────────
+package "Auditoría" {
+
+  entity bitacora_auditoria {
+    * id           : INT UNSIGNED <<PK>>
+    --
+    * incidente_id : INT UNSIGNED <<FK>>
+    * usuario_id   : INT UNSIGNED <<FK>>
+    * fecha_hora   : DATETIME     <<NN>>
+    * accion       : VARCHAR(80)  <<NN>>
+      detalle      : TEXT
+  }
+}
+
+' ─── Relaciones ──────────────────────────────────────────────
+
+' severidad → configuracion_sla (1:1)
+severidad          ||--|| configuracion_sla : "define SLA"
+
+' incidente → catálogos
+incidente }o--||  tipo_incidente   : "clasificado como"
+incidente }o--||  severidad        : "tiene"
+incidente }o--||  estado_incidente : "se encuentra en"
+incidente }o--||  activo_afectado  : "afecta a"
+
+' incidente → usuarios (analista y supervisor opcionales)
+usuario            ||--o{ incidente       : "analiza (analista_id)"
+usuario            ||--o{ incidente       : "supervisa (supervisor_id)"
+
+' incidente → evidencia (composición 1:N)
+incidente          ||--|{ evidencia        : "contiene"
+usuario            ||--o{ evidencia        : "registra"
+
+' incidente → bitácora (composición 1:N)
+incidente          ||--|{ bitacora_auditoria : "genera"
+usuario            ||--o{ bitacora_auditoria : "ejecuta"
+
+@enduml

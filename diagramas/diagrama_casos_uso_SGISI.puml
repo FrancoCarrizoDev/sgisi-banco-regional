@@ -1,0 +1,85 @@
+@startuml SGISI - Diagrama de Casos de Uso
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #2C6EA6
+  ArrowColor #555555
+  FontSize 11
+}
+skinparam actor {
+  BackgroundColor #D6EAF8
+  BorderColor #2C6EA6
+  FontSize 11
+}
+skinparam package {
+  BackgroundColor #F4F6F7
+  BorderColor #AAB7B8
+  FontSize 11
+  FontStyle bold
+}
+
+' ─── Actores ───────────────────────────────────────────────
+actor "Analista SOC"             as Analista
+actor "Supervisor de Seguridad"  as Supervisor
+actor "Administrador"            as Admin
+
+' ─── Sistema ────────────────────────────────────────────────
+rectangle "SGISI – Sistema de Gestión de Incidentes de Seguridad Informática" {
+
+  package "Autenticación" {
+    usecase "UC01 – Iniciar sesión\n[RF09]" as UC01
+  }
+
+  package "Gestión de Incidentes" {
+    usecase "UC02 – Registrar incidente\n[RF01]"              as UC02
+    usecase "UC03 – Asignar incidente a analista\n[RF02]"     as UC03
+    usecase "UC04 – Actualizar estado del incidente\n[RF03]"  as UC04
+    usecase "UC05 – Registrar evidencia y observación\n[RF04]" as UC05
+    usecase "UC06 – Escalar incidente al Supervisor\n[RF06]"  as UC06
+  }
+
+  package "Control de SLA" {
+    usecase "UC07 – Controlar vencimiento de SLA\n[RF05]" as UC07
+  }
+
+  package "Consultas y Reportes" {
+    usecase "UC08 – Consultar incidentes con filtros\n[RF07]" as UC08
+    usecase "UC09 – Generar reporte de gestión\n[RF08]"       as UC09
+  }
+
+  package "Auditoría y Administración" {
+    usecase "UC10 – Consultar bitácora de auditoría\n[RF10]" as UC10
+    usecase "UC11 – Gestionar usuarios y roles"               as UC11
+  }
+}
+
+' ─── Analista SOC ───────────────────────────────────────────
+Analista --> UC01
+Analista --> UC02
+Analista --> UC04
+Analista --> UC05
+Analista --> UC06
+Analista --> UC08
+
+' ─── Supervisor de Seguridad ────────────────────────────────
+Supervisor --> UC01
+Supervisor --> UC03
+Supervisor --> UC07
+Supervisor --> UC08
+Supervisor --> UC09
+Supervisor --> UC10
+
+' ─── Administrador ──────────────────────────────────────────
+Admin --> UC01
+Admin --> UC09
+Admin --> UC10
+Admin --> UC11
+
+' ─── Relaciones entre casos de uso ──────────────────────────
+' include: generar reporte siempre requiere consultar incidentes
+UC09 .> UC08 : <<include>>
+
+@enduml

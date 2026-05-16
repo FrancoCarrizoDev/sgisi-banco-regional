@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sgisi-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sgisi
+      MYSQL_USER: sgisi_app
+      MYSQL_PASSWORD: sgisi_app_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - sgisi_mysql_data:/var/lib/mysql
+      - ./src/src/main/resources/docker-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+volumes:
+  sgisi_mysql_data:

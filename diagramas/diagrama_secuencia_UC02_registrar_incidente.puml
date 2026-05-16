@@ -1,0 +1,108 @@
+@startuml UC02 - Registrar Incidente
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequence {
+  ActorBorderColor       #2C6EA6
+  ActorBackgroundColor   #D6EAF8
+  ParticipantBorderColor #2C6EA6
+  ParticipantBackgroundColor White
+  LifeLineBorderColor    #AAB7B8
+  ArrowColor             #555555
+  NoteBackgroundColor    #FEF9E7
+  NoteBorderColor        #F0B27A
+  DividerBackgroundColor #EBF5FB
+  BoxBackgroundColor     #F4F6F7
+  BoxBorderColor         #AAB7B8
+  FontSize 11
+}
+
+title UC02 – Registrar Incidente [RF01]\nActor: Analista SOC
+
+actor    "Analista SOC"           as ANA
+boundary "PanelListaIncidentes"   as PANEL  #D6EAF8
+boundary "FormRegistroIncidente"  as FORM   #D6EAF8
+control  "GestorIncidentes"       as GSTI
+control  "GestorSLA"              as GSTSLA
+entity   "IncidenteDAO\n(impl)"   as IDAO
+entity   "SlaDAO\n(impl)"         as SDAO
+entity   "BitacoraDAO\n(impl)"    as BDAO
+database "MySQL\nsgisi"           as DB
+
+== Flujo principal ==
+
+ANA   ->  PANEL : selecciona "Nuevo Incidente"
+activate PANEL
+
+PANEL ->  FORM  : abre FormRegistroIncidente
+activate FORM
+FORM  --> ANA   : muestra formulario\n[tipo, severidad, descripción, activo afectado]
+
+ANA   ->  FORM  : completa campos y confirma
+FORM  ->  FORM  : validarCampos()
+
+alt Campos válidos
+
+    FORM  ->  GSTI  : registrarIncidente(incidente, analistaSoc)
+    activate GSTI
+
+    ' ── Cálculo de SLA ──────────────────────────────────────
+    GSTI  ->  GSTSLA : calcularVencimiento(incidente)
+    activate GSTSLA
+
+    GSTSLA -> SDAO   : buscarPorSeveridad(incidente.getSeveridad())
+    activate SDAO
+    SDAO  ->  DB     : SELECT * FROM configuracion_sla\nWHERE severidad_id = ?
+    activate DB
+    DB    --> SDAO   : plazo_horas
+    deactivate DB
+    SDAO  --> GSTSLA : ConfiguracionSLA
+    deactivate SDAO
+
+    GSTSLA -> GSTSLA : fechaVencimiento =\nfechaDeteccion + plazoHoras
+    GSTSLA --> GSTI  : LocalDateTime fechaVencimientoSLA
+    deactivate GSTSLA
+
+    ' ── Persistencia del incidente ──────────────────────────
+    GSTI  ->  GSTI   : incidente.setFechaVencimientoSLA(fechaVencimiento)\nincidente.setEstado(new EstadoDetectado())
+
+    note right of GSTI
+      El incidente nace en estado
+      DETECTADO. El patrón State
+      inicializa el objeto de estado
+      correspondiente.
+    end note
+
+    GSTI  ->  IDAO   : guardar(incidente)
+    activate IDAO
+    IDAO  ->  DB     : INSERT INTO incidente\n(tipo_id, severidad_id, estado_id,\nactivo_id, descripcion,\nfecha_deteccion, fecha_vencimiento_sla)
+    activate DB
+    DB    --> IDAO   : id generado (AUTO_INCREMENT)
+    deactivate DB
+    IDAO  --> GSTI   : incidente con id asignado
+    deactivate IDAO
+
+    ' ── Registro en bitácora ────────────────────────────────
+    GSTI  ->  BDAO   : registrar(new EntradaBitacora\n  (incidente, analistaSoc, "REGISTRO", detalle))
+    activate BDAO
+    BDAO  ->  DB     : INSERT INTO bitacora_auditoria\n(incidente_id, usuario_id,\nfecha_hora, accion, detalle)
+    activate DB
+    DB    --> BDAO   : OK
+    deactivate DB
+    deactivate BDAO
+
+    GSTI  --> FORM   : Incidente registrado (id, fechaVencimientoSLA)
+    deactivate GSTI
+
+    FORM  --> ANA    : muestra confirmación\n"Incidente #id registrado.\nSLA vence: fechaVencimiento"
+    deactivate FORM
+    deactivate PANEL
+
+else Campos incompletos u inválidos
+
+    FORM  --> ANA    : resalta campos con error\nNo se realiza ninguna operación
+    deactivate FORM
+    deactivate PANEL
+
+end
+
+@enduml

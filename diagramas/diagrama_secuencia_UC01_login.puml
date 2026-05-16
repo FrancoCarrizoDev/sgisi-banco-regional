@@ -1,0 +1,89 @@
+@startuml UC01 - Iniciar Sesión
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceParticipant underline
+skinparam sequence {
+  ActorBorderColor      #2C6EA6
+  ActorBackgroundColor  #D6EAF8
+  ParticipantBorderColor #2C6EA6
+  ParticipantBackgroundColor White
+  LifeLineBorderColor   #AAB7B8
+  ArrowColor            #555555
+  NoteBackgroundColor   #FEF9E7
+  NoteBorderColor       #F0B27A
+  DividerBackgroundColor #EBF5FB
+  BoxBackgroundColor    #F4F6F7
+  BoxBorderColor        #AAB7B8
+  FontSize 11
+}
+
+title UC01 – Iniciar Sesión [RF09]\nActor: Analista SOC / Supervisor de Seguridad / Administrador
+
+actor       "Usuario"            as USR
+boundary    "DialogLogin"        as DLG   #D6EAF8
+control     "GestorUsuarios"     as GSTUSR
+entity      "UsuarioDAO\n(impl)" as DAO
+database    "MySQL\nsgisi"       as DB
+
+== Flujo principal ==
+
+USR  ->  DLG    : ingresa email y contraseña
+activate DLG
+
+DLG  ->  DLG    : hashContrasena(contrasena)\n[SHA-256]
+
+DLG  ->  GSTUSR : autenticar(email, contrasenaHash)
+activate GSTUSR
+
+GSTUSR ->  DAO  : buscarPorEmail(email)
+activate DAO
+
+DAO  ->  DB     : SELECT * FROM usuario\nWHERE email = ? AND activo = 1
+activate DB
+DB   --> DAO    : ResultSet con datos del usuario
+deactivate DB
+
+DAO  --> GSTUSR : Usuario (o null si no existe)
+deactivate DAO
+
+alt Usuario encontrado
+    GSTUSR -> GSTUSR : verificar(contrasenaHash == usuario.contrasenaHash)
+
+    alt Contraseña válida
+        GSTUSR --> DLG  : Usuario autenticado
+        deactivate GSTUSR
+
+        DLG  ->  DLG    : obtenerRol(usuario)
+
+        note right of DLG
+          El rol determina qué paneles
+          y funcionalidades se habilitan
+          en VentanaPrincipal.
+        end note
+
+        DLG  -->  USR   : abre VentanaPrincipal\ncon menú según rol
+        deactivate DLG
+
+    else Contraseña inválida
+        GSTUSR --> DLG  : null (credenciales incorrectas)
+        deactivate GSTUSR
+        DLG  --> USR    : muestra error\n"Credenciales inválidas"
+        deactivate DLG
+    end
+
+else Usuario no encontrado o inactivo
+    GSTUSR --> DLG  : null
+    deactivate GSTUSR
+    DLG  --> USR    : muestra error\n"Usuario no encontrado"
+    deactivate DLG
+end
+
+== Flujo alternativo – cuenta inactiva ==
+
+note over DB
+  La consulta filtra activo = 1.
+  Un usuario dado de baja lógica
+  no puede iniciar sesión.
+end note
+
+@enduml

@@ -1,0 +1,111 @@
+@startuml SGISI - Diagrama de Infraestructura de Red
+
+skinparam node {
+  BackgroundColor      White
+  BorderColor          #2C6EA6
+  FontSize             11
+}
+skinparam component {
+  BackgroundColor      #EBF5FB
+  BorderColor          #2C6EA6
+  FontSize             10
+}
+skinparam database {
+  BackgroundColor      #D6EAF8
+  BorderColor          #2C6EA6
+  FontSize             10
+}
+skinparam cloud {
+  BackgroundColor      #F2F3F4
+  BorderColor          #7F8C8D
+}
+skinparam arrow {
+  FontSize             9
+  Color                #555555
+}
+skinparam note {
+  BackgroundColor      #FEF9E7
+  BorderColor          #F0B27A
+  FontSize             9
+}
+
+' ── Leyenda de IPs (rango ficticio representativo) ───────────
+' VLAN 10 – SOC:       192.168.10.0/24
+' VLAN 20 – Servidores:192.168.20.0/24
+' VLAN 30 – Gestión:   192.168.30.0/24
+
+' ── Internet / exterior ──────────────────────────────────────
+cloud "Internet / Red Externa" as INTERNET
+
+' ── Perímetro ────────────────────────────────────────────────
+node "Firewall Perimetral\n(Cisco ASA)" as FW {
+  component "ACL Perimetral\n──────────────────\nDENY ANY → :3306\nPERMIT HTTPS → DMZ" as ACL_EXT
+}
+
+' ── Datacenter Banco Regional SA ─────────────────────────────
+node "Datacenter – Banco Regional SA" as DC {
+
+  node "Switch Core / Distribución\n(IEEE 802.1Q – VLANs)" as SW_CORE
+
+  ' ── VLAN SOC ─────────────────────────────────────────────
+  node "VLAN 10 – SOC Seguridad\n192.168.10.0/24" as VLAN_SOC {
+    component "Workstation Analista SOC 1\n192.168.10.11\nJava 21 + SGISI" as WS_A1
+    component "Workstation Analista SOC 2\n192.168.10.12\nJava 21 + SGISI" as WS_A2
+    component "Workstation Supervisor\n192.168.10.20\nJava 21 + SGISI" as WS_SUP
+  }
+
+  ' ── VLAN Servidores ──────────────────────────────────────
+  node "VLAN 20 – Servidores\n192.168.20.0/24" as VLAN_SRV {
+    database "Servidor MySQL 8.0\nsgisi (schema)\n192.168.20.100 : 3306" as DB_SRV
+    component "Servidor de Archivos\n(logs, evidencias)\n192.168.20.101" as FS
+  }
+
+  ' ── VLAN Gestión ─────────────────────────────────────────
+  node "VLAN 30 – Gestión\n192.168.30.0/24" as VLAN_MGT {
+    component "Consola de Administración\nDBA / Sysadmin\n192.168.30.10" as ADM
+  }
+
+  ' ── ACL entre VLANs (firewall interno) ───────────────────
+  component "Firewall Interno / ACL Inter-VLAN\n──────────────────────────────────────\nPERMIT TCP 192.168.10.0/24 → 192.168.20.100:3306\nPERMIT TCP 192.168.30.0/24 → 192.168.20.100:3306\nDENY  ANY → 192.168.20.100:3306" as ACL_INT
+}
+
+' ── Relaciones ───────────────────────────────────────────────
+
+INTERNET  -->  FW       : TCP / HTTPS\n(canales digitales)
+FW        -->  SW_CORE  : Troncal 802.1Q
+
+SW_CORE   -->  VLAN_SOC  : Access port VLAN 10
+SW_CORE   -->  VLAN_SRV  : Access port VLAN 20
+SW_CORE   -->  VLAN_MGT  : Access port VLAN 30
+SW_CORE   -->  ACL_INT
+
+' Comunicación SGISI → MySQL (la conexión central del sistema)
+WS_A1  -->  DB_SRV : **JDBC / TCP:3306**\nTLS 1.3 cifrado
+WS_A2  -->  DB_SRV : **JDBC / TCP:3306**\nTLS 1.3 cifrado
+WS_SUP -->  DB_SRV : **JDBC / TCP:3306**\nTLS 1.3 cifrado
+ADM    -->  DB_SRV : TCP:3306\n(administración DBA)
+
+' ── Notas ────────────────────────────────────────────────────
+note right of VLAN_SOC
+  Las workstations del SOC ejecutan
+  la aplicación SGISI (Java 21 + Swing).
+  El driver **mysql-connector-java 8.0**
+  abre la conexión JDBC al servidor.
+end note
+
+note right of DB_SRV
+  MySQL 8.0 – on premise.
+  Usuario de aplicación: **sgisi_app**
+  Permisos: SELECT, INSERT, UPDATE
+  sobre schema **sgisi** únicamente.
+  Sin acceso a otros esquemas del banco.
+end note
+
+note bottom of ACL_INT
+  El puerto 3306 es inaccesible desde
+  Internet y desde otras VLANs internas.
+  Solo VLAN SOC y VLAN Gestión tienen
+  alcance al servidor de base de datos.
+end note
+
+@enduml

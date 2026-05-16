@@ -1,0 +1,154 @@
+@startuml SGISI - Diagrama de Dominio
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor #2C6EA6
+  ArrowColor #2C6EA6
+  FontSize 11
+}
+skinparam package {
+  BackgroundColor #F4F6F7
+  BorderColor #AAB7B8
+  FontSize 11
+  FontStyle bold
+}
+skinparam stereotype {
+  CBackgroundColor #D6EAF8
+  CBorderColor #2C6EA6
+}
+
+' ─── Usuarios ────────────────────────────────────────────────
+package "Gestión de Usuarios" {
+
+  abstract class Usuario {
+    - id: int
+    - nombre: String
+    - email: String
+    - contraseña: String
+    - activo: boolean
+    + iniciarSesion()
+  }
+
+  class AnalistaSoc {
+    - legajo: String
+    + registrarIncidente()
+    + actualizarEstado()
+    + registrarEvidencia()
+    + escalarIncidente()
+  }
+
+  class SupervisorSeguridad {
+    - legajo: String
+    + asignarIncidente()
+    + revisarSLA()
+    + generarReporte()
+  }
+
+  class Administrador {
+    + gestionarUsuarios()
+  }
+
+  Usuario <|-- AnalistaSoc
+  Usuario <|-- SupervisorSeguridad
+  Usuario <|-- Administrador
+}
+
+' ─── Incidente ───────────────────────────────────────────────
+package "Gestión de Incidentes" {
+
+  class Incidente {
+    - id: int
+    - descripcion: String
+    - activoAfectado: String
+    - fechaDeteccion: DateTime
+    - fechaAsignacion: DateTime
+    - fechaCierre: DateTime
+    + calcularMTTD(): Duration
+    + calcularMTTR(): Duration
+  }
+
+  enum TipoIncidente {
+    ACCESO_NO_AUTORIZADO
+    MALWARE
+    PHISHING
+    FUGA_DE_DATOS
+    DENEGACION_DE_SERVICIO
+    FRAUDE_TRANSACCIONAL
+  }
+
+  enum Severidad {
+    CRITICO
+    ALTO
+    MEDIO
+    BAJO
+  }
+
+  enum EstadoIncidente {
+    DETECTADO
+    EN_ANALISIS
+    CONTENIDO
+    EN_REMEDIACION
+    CERRADO
+    FALSO_POSITIVO
+  }
+
+  class ActivoAfectado {
+    - id: int
+    - nombre: String
+    - tipo: String
+    - descripcion: String
+  }
+
+  Incidente --> TipoIncidente
+  Incidente --> Severidad
+  Incidente --> EstadoIncidente
+  Incidente "1" --> "1" ActivoAfectado : afecta >
+}
+
+' ─── Evidencia ───────────────────────────────────────────────
+package "Evidencias" {
+
+  class Evidencia {
+    - id: int
+    - tipoEvidencia: String
+    - descripcion: String
+    - fechaRegistro: DateTime
+  }
+
+  Incidente "1" *-- "0..*" Evidencia : contiene >
+}
+
+' ─── SLA ─────────────────────────────────────────────────────
+package "Control de SLA" {
+
+  class ConfiguracionSLA {
+    - plazoHoras: int
+    + calcularVencimiento(fechaDeteccion): DateTime
+    + estaVencido(incidente): boolean
+  }
+
+  ConfiguracionSLA --> Severidad
+  Incidente "1" --> "1" ConfiguracionSLA : se rige por >
+}
+
+' ─── Bitácora ────────────────────────────────────────────────
+package "Auditoría" {
+
+  class EntradaBitacora {
+    - id: int
+    - fechaHora: DateTime
+    - accion: String
+    - detalle: String
+  }
+
+  Incidente "1" *-- "1..*" EntradaBitacora : registra >
+}
+
+' ─── Relaciones entre paquetes ───────────────────────────────
+AnalistaSoc "0..1" -- "0..*" Incidente     : analiza >
+SupervisorSeguridad "1" -- "0..*" Incidente : supervisa >
+AnalistaSoc "1" -- "0..*" Evidencia        : incorpora >
+Usuario "1" -- "0..*" EntradaBitacora      : genera >
+
+@enduml

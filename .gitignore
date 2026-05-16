@@ -1,0 +1,30 @@
+# Maven / build outputs
+target/
+**/target/
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local configuration / secrets
+.env
+application-local.properties
+**/application-local.properties
+
+# Local Git migration backups
+.git-src-backup/
+src/.git-src-backup/
+*.bundle

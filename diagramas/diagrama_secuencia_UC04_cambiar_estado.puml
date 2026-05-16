@@ -1,0 +1,136 @@
+@startuml UC04 - Cambiar Estado del Incidente
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequence {
+  ActorBorderColor       #2C6EA6
+  ActorBackgroundColor   #D6EAF8
+  ParticipantBorderColor #2C6EA6
+  ParticipantBackgroundColor White
+  LifeLineBorderColor    #AAB7B8
+  ArrowColor             #555555
+  NoteBackgroundColor    #FEF9E7
+  NoteBorderColor        #F0B27A
+  DividerBackgroundColor #EBF5FB
+  BoxBackgroundColor     #F4F6F7
+  BoxBorderColor         #AAB7B8
+  FontSize 11
+}
+
+title UC04 – Actualizar Estado del Incidente [RF03]\nActor: Analista SOC / Supervisor de Seguridad\nPatrón aplicado: State
+
+actor    "Analista SOC"           as ANA
+boundary "PanelDetalleIncidente"  as DET    #D6EAF8
+control  "GestorIncidentes"       as GSTI
+entity   "EstadoIncidenteState"   as STATE  #EBF5FB
+entity   "IncidenteDAO\n(impl)"   as IDAO
+entity   "BitacoraDAO\n(impl)"    as BDAO
+database "MySQL\nsgisi"           as DB
+
+== Apertura del detalle ==
+
+ANA  ->  DET  : selecciona incidente en la lista
+activate DET
+
+DET  ->  GSTI : consultarIncidentes(filtros) → buscarPorId(incidenteId)
+activate GSTI
+GSTI ->  IDAO : buscarPorId(incidenteId)
+activate IDAO
+IDAO ->  DB   : SELECT i.*, e.nombre AS estado\nFROM incidente i JOIN estado_incidente e...
+activate DB
+DB   --> IDAO : datos del incidente
+deactivate DB
+IDAO --> GSTI : Incidente (con EstadoIncidenteState ya instanciado)
+deactivate IDAO
+GSTI --> DET  : Incidente
+deactivate GSTI
+
+note right of DET
+  La capa DAO reconstruye el objeto
+  Incidente con su estado actual.
+  Ej: si estado = "EN_ANALISIS", asigna
+  new EstadoEnAnalisis() al atributo.
+end note
+
+DET  ->  STATE : getTransicionesValidas()
+activate STATE
+STATE --> DET  : ["CONTENIDO", "FALSO_POSITIVO"]
+deactivate STATE
+
+DET  --> ANA  : muestra panel con estado actual\ny opciones de transición disponibles
+
+== Flujo principal – transición válida ==
+
+ANA  ->  DET  : selecciona nuevo estado "CONTENIDO"\ne ingresa observación obligatoria
+DET  ->  GSTI : cambiarEstado(incidenteId, "CONTENIDO", observacion, analista)
+activate GSTI
+
+' ── Validación por patrón State ────────────────────────────
+GSTI ->  IDAO : buscarPorId(incidenteId)
+activate IDAO
+IDAO --> GSTI : incidente actual
+deactivate IDAO
+
+GSTI ->  STATE : puedeTransicionarA("CONTENIDO")
+activate STATE
+
+note right of STATE
+  Cada estado concreto conoce
+  sus transiciones válidas.
+  EstadoEnAnalisis permite:
+  → CONTENIDO
+  → FALSO_POSITIVO
+end note
+
+STATE --> GSTI : true
+deactivate STATE
+
+' ── Actualización del estado ────────────────────────────────
+GSTI ->  GSTI  : nuevoEstado = EstadoFactory\n  .crear("CONTENIDO")\nincidente.setEstado(nuevoEstado)
+
+GSTI ->  IDAO  : actualizar(incidente)
+activate IDAO
+IDAO ->  DB    : UPDATE incidente\nSET estado_id = ?\nWHERE id = ?
+activate DB
+DB   --> IDAO  : OK (1 fila afectada)
+deactivate DB
+IDAO --> GSTI  : void
+deactivate IDAO
+
+' ── Registro en bitácora ────────────────────────────────────
+GSTI ->  BDAO  : registrar(new EntradaBitacora\n  (incidente, analista,\n   "CAMBIO_ESTADO",\n   "EN_ANALISIS → CONTENIDO: " + obs))
+activate BDAO
+BDAO ->  DB    : INSERT INTO bitacora_auditoria\n(incidente_id, usuario_id,\nfecha_hora, accion, detalle)
+activate DB
+DB   --> BDAO  : OK
+deactivate DB
+deactivate BDAO
+
+GSTI --> DET   : Incidente actualizado
+deactivate GSTI
+
+DET  --> ANA   : refresca vista\nEstado: CONTENIDO\nÚltima acción registrada en bitácora
+deactivate DET
+
+== Flujo alternativo – transición inválida ==
+
+ANA  ->  DET  : intenta transición no permitida\n(ej: DETECTADO → CERRADO)
+DET  ->  GSTI : cambiarEstado(incidenteId, "CERRADO", obs, analista)
+activate GSTI
+
+GSTI ->  IDAO : buscarPorId(incidenteId)
+activate IDAO
+IDAO --> GSTI : incidente (estado = DETECTADO)
+deactivate IDAO
+
+GSTI ->  STATE : puedeTransicionarA("CERRADO")
+activate STATE
+STATE --> GSTI : false\n[transición no permitida\ndesde DETECTADO]
+deactivate STATE
+
+GSTI --> DET  : IllegalStateException\n("Transición inválida. Desde DETECTADO\nsolo se permite: EN_ANALISIS, FALSO_POSITIVO")
+deactivate GSTI
+
+DET  --> ANA  : muestra error con transiciones válidas\nNo se modifica la base de datos
+deactivate DET
+
+@enduml

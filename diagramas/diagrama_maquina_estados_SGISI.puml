@@ -1,0 +1,91 @@
+@startuml SGISI - Máquina de Estados del Incidente
+
+skinparam state {
+  BackgroundColor      White
+  BorderColor          #2C6EA6
+  ArrowColor           #555555
+  StartColor           #2C6EA6
+  EndColor             #2C6EA6
+  FontSize             11
+}
+skinparam arrow {
+  FontSize 10
+}
+
+' ================================================================
+' Máquina de estados del ciclo de vida del incidente (RF03)
+' ================================================================
+
+[*] --> DETECTADO : registrarIncidente()\n[RF01 – Analista SOC]
+
+state DETECTADO {
+  DETECTADO : SLA iniciado automáticamente
+  DETECTADO : Incidente pendiente de asignación
+}
+
+state EN_ANALISIS {
+  EN_ANALISIS : Analista asignado
+  EN_ANALISIS : Investigación activa
+  EN_ANALISIS : SLA en curso
+}
+
+state CONTENIDO {
+  CONTENIDO : Amenaza aislada
+  CONTENIDO : Propagación detenida
+  CONTENIDO : Servicio puede estar degradado
+}
+
+state EN_REMEDIACION {
+  EN_REMEDIACION : Aplicando correcciones
+  EN_REMEDIACION : Restaurando servicios afectados
+}
+
+state CERRADO {
+  CERRADO : Resolución confirmada
+  CERRADO : MTTD y MTTR calculados
+  CERRADO : Lecciones aprendidas registradas
+}
+
+state FALSO_POSITIVO {
+  FALSO_POSITIVO : Incidente descartado
+  FALSO_POSITIVO : Sin impacto real confirmado
+}
+
+' ── Transiciones válidas ──────────────────────────────────────
+
+DETECTADO    --> EN_ANALISIS     : asignarIncidente()\n[RF02 – Supervisor]
+
+DETECTADO    --> FALSO_POSITIVO  : descartarIncidente()\n[RF03 – Analista / Supervisor]
+
+EN_ANALISIS  --> CONTENIDO       : contenerIncidente()\n[RF03 – Analista SOC]
+
+EN_ANALISIS  --> FALSO_POSITIVO  : descartarIncidente()\n[RF03 – Analista / Supervisor]
+
+CONTENIDO    --> EN_REMEDIACION  : iniciarRemediacion()\n[RF03 – Analista SOC]
+
+EN_REMEDIACION --> CERRADO       : cerrarIncidente()\n[RF03 – Analista / Supervisor]
+
+EN_REMEDIACION --> EN_ANALISIS   : reabrirAnalisis()\n[RF03 – remediación fallida]
+
+CERRADO      --> [*]
+FALSO_POSITIVO --> [*]
+
+note right of DETECTADO
+  **SLA activo desde este estado.**
+  Tiempo de permanencia impacta
+  el MTTD (Mean Time To Detect).
+end note
+
+note right of CERRADO
+  **MTTR = fechaCierre - fechaDeteccion**
+  El sistema calcula la métrica
+  automáticamente al cerrar.
+end note
+
+note bottom of EN_REMEDIACION
+  La transición de vuelta a EN_ANALISIS
+  modela el caso de una remediación fallida
+  que requiere re-análisis del incidente.
+end note
+
+@enduml
