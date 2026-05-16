@@ -1,0 +1,160 @@
+@startuml SGISI - Diagrama de Clases - Capa Modelo
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor      #2C6EA6
+  ArrowColor       #555555
+  FontSize         10
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor     #2C6EA6
+}
+skinparam enum {
+  BackgroundColor #EBF5FB
+  BorderColor     #2C6EA6
+}
+skinparam package {
+  BackgroundColor #F8F9F9
+  BorderColor     #AAB7B8
+  FontSize        11
+  FontStyle       bold
+}
+skinparam arrow {
+  FontSize 9
+}
+
+package "modelo" {
+
+  abstract class Usuario {
+    # id            : int
+    # nombre        : String
+    # apellido      : String
+    # email         : String
+    # legajo        : String
+    # contrasenaHash: String
+    # activo        : boolean
+    # fechaCreacion : LocalDateTime
+    + getId()       : int
+    + getEmail()    : String
+    + isActivo()    : boolean
+    + {abstract} getRol() : RolUsuario
+  }
+
+  class AnalistaSoc {
+    + getRol()            : RolUsuario
+    + registrarIncidente(inc : Incidente) : void
+    + actualizarEstado(inc : Incidente, nuevoEstado : String, obs : String) : void
+    + registrarEvidencia(ev : Evidencia)  : void
+    + escalarIncidente(inc : Incidente, motivo : String) : void
+  }
+
+  class SupervisorSeguridad {
+    + getRol()            : RolUsuario
+    + asignarIncidente(inc : Incidente, analista : AnalistaSoc) : void
+    + revisarVencimientosSLA() : List<Incidente>
+    + generarReporte(desde : LocalDate, hasta : LocalDate) : ReporteGestion
+  }
+
+  class Administrador {
+    + getRol()                      : RolUsuario
+    + gestionarUsuarios()           : void
+    + consultarBitacora(incId : int): List<EntradaBitacora>
+  }
+
+  enum RolUsuario {
+    ANALISTA_SOC
+    SUPERVISOR_SEGURIDAD
+    ADMINISTRADOR
+  }
+
+  Usuario <|-- AnalistaSoc
+  Usuario <|-- SupervisorSeguridad
+  Usuario <|-- Administrador
+  Usuario ..> RolUsuario
+
+  class Incidente {
+    - id                  : int
+    - descripcion         : String
+    - fechaDeteccion      : LocalDateTime
+    - fechaAsignacion     : LocalDateTime
+    - fechaCierre         : LocalDateTime
+    - fechaVencimientoSLA : LocalDateTime
+    - motivoEscalada      : String
+    - tipo                : TipoIncidente
+    - severidad           : NivelSeveridad
+    - estado              : EstadoIncidenteState
+    - activoAfectado      : ActivoAfectado
+    - analistaAsignado    : AnalistaSoc
+    - supervisorAsignado  : SupervisorSeguridad
+    + getId()             : int
+    + getEstado()         : EstadoIncidenteState
+    + setEstado(e : EstadoIncidenteState) : void
+    + calcularMTTD()      : Duration
+    + calcularMTTR()      : Duration
+    + isSLAVencido()      : boolean
+  }
+
+  enum TipoIncidente {
+    ACCESO_NO_AUTORIZADO
+    MALWARE
+    PHISHING
+    FUGA_DE_DATOS
+    DENEGACION_DE_SERVICIO
+    FRAUDE_TRANSACCIONAL
+  }
+
+  enum NivelSeveridad {
+    CRITICO
+    ALTO
+    MEDIO
+    BAJO
+  }
+
+  class ActivoAfectado {
+    - id         : int
+    - nombre     : String
+    - tipo       : String
+    - descripcion: String
+    + getId()    : int
+    + getNombre(): String
+  }
+
+  class ConfiguracionSLA {
+    - id          : int
+    - severidad   : NivelSeveridad
+    - plazoHoras  : int
+    + calcularVencimiento(fechaDeteccion : LocalDateTime) : LocalDateTime
+    + estaVencido(inc : Incidente)  : boolean
+    + getPlazoHoras() : int
+  }
+
+  class Evidencia {
+    - id                : int
+    - tipoEvidencia     : String
+    - descripcion       : String
+    - fechaRegistro     : LocalDateTime
+    + getId()           : int
+    + getTipoEvidencia(): String
+  }
+
+  class EntradaBitacora {
+    - id        : int
+    - fechaHora : LocalDateTime
+    - accion    : String
+    - detalle   : String
+    + getId()   : int
+    + getAccion(): String
+  }
+
+  Incidente     ..>  TipoIncidente
+  Incidente     ..>  NivelSeveridad
+  Incidente     -->  ActivoAfectado    : afecta >
+  Incidente     -->  ConfiguracionSLA  : se rige por >
+  ConfiguracionSLA ..> NivelSeveridad
+  Incidente "1" *--> "0..*" Evidencia       : contiene >
+  Incidente "1" *--> "1..*" EntradaBitacora : registra >
+}
+
+@enduml

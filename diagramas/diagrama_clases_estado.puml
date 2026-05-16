@@ -1,0 +1,86 @@
+@startuml SGISI - Diagrama de Clases - Patrón State
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor      #2C6EA6
+  ArrowColor       #555555
+  FontSize         10
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor     #2C6EA6
+}
+skinparam package {
+  BackgroundColor #F8F9F9
+  BorderColor     #AAB7B8
+  FontSize        11
+  FontStyle       bold
+}
+skinparam arrow {
+  FontSize 9
+}
+
+package "modelo" {
+  class Incidente {
+    - estado : EstadoIncidenteState
+    + getEstado() : EstadoIncidenteState
+    + setEstado(e : EstadoIncidenteState) : void
+  }
+}
+
+package "modelo.estado" {
+
+  interface EstadoIncidenteState {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoDetectado {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoEnAnalisis {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoContenido {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoEnRemediacion {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoCerrado {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  class EstadoFalsoPositivo {
+    + getNombreEstado()                          : String
+    + getTransicionesValidas()                   : List<String>
+    + puedeTransicionarA(nuevoEstado : String)   : boolean
+  }
+
+  EstadoIncidenteState <|.. EstadoDetectado
+  EstadoIncidenteState <|.. EstadoEnAnalisis
+  EstadoIncidenteState <|.. EstadoContenido
+  EstadoIncidenteState <|.. EstadoEnRemediacion
+  EstadoIncidenteState <|.. EstadoCerrado
+  EstadoIncidenteState <|.. EstadoFalsoPositivo
+}
+
+Incidente --> EstadoIncidenteState : estado >
+
+@enduml

@@ -1,0 +1,102 @@
+@startuml SGISI - Diagrama de Clases - Capas DAO, Servicio y Presentación
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor      #2C6EA6
+  ArrowColor       #555555
+  FontSize         10
+}
+skinparam interface {
+  BackgroundColor #D6EAF8
+  BorderColor     #2C6EA6
+}
+skinparam package {
+  BackgroundColor #F8F9F9
+  BorderColor     #AAB7B8
+  FontSize        11
+  FontStyle       bold
+}
+skinparam arrow {
+  FontSize 9
+}
+
+' ================================================================
+' CAPA DAO – Interfaces
+' ================================================================
+package "dao" {
+  interface IncidenteDAO
+  interface UsuarioDAO
+  interface EvidenciaDAO
+  interface BitacoraDAO
+  interface SlaDAO
+  class ConexionDB <<Singleton>>
+}
+
+' ================================================================
+' CAPA DAO – Implementaciones JDBC
+' ================================================================
+package "dao.impl" {
+  class IncidenteDAOImpl
+  class UsuarioDAOImpl
+  class EvidenciaDAOImpl
+  class BitacoraDAOImpl
+  class SlaDAOImpl
+
+  IncidenteDAOImpl ..|> IncidenteDAO
+  UsuarioDAOImpl   ..|> UsuarioDAO
+  EvidenciaDAOImpl ..|> EvidenciaDAO
+  BitacoraDAOImpl  ..|> BitacoraDAO
+  SlaDAOImpl       ..|> SlaDAO
+
+  IncidenteDAOImpl --> ConexionDB
+  UsuarioDAOImpl   --> ConexionDB
+  EvidenciaDAOImpl --> ConexionDB
+  BitacoraDAOImpl  --> ConexionDB
+  SlaDAOImpl       --> ConexionDB
+}
+
+' ================================================================
+' CAPA DE SERVICIO
+' ================================================================
+package "servicio" {
+  class GestorIncidentes
+  class GestorUsuarios
+  class GestorSLA
+  class GestorReportes
+  class ReporteGestion
+
+  GestorIncidentes --> IncidenteDAO
+  GestorIncidentes --> BitacoraDAO
+  GestorIncidentes --> GestorSLA
+  GestorUsuarios   --> UsuarioDAO
+  GestorSLA        --> SlaDAO
+  GestorSLA        --> IncidenteDAO
+  GestorReportes   --> IncidenteDAO
+  GestorReportes   ..> ReporteGestion : crea >
+}
+
+' ================================================================
+' CAPA DE PRESENTACIÓN
+' ================================================================
+package "presentacion" {
+  class VentanaPrincipal
+  class DialogLogin
+  class PanelListaIncidentes
+  class FormRegistroIncidente
+  class PanelDetalleIncidente
+  class PanelReportes
+
+  VentanaPrincipal     --> DialogLogin
+  VentanaPrincipal     --> PanelListaIncidentes
+  VentanaPrincipal     --> PanelReportes
+  PanelListaIncidentes --> FormRegistroIncidente
+  PanelListaIncidentes --> PanelDetalleIncidente
+  DialogLogin          --> GestorUsuarios
+  PanelListaIncidentes --> GestorIncidentes
+  FormRegistroIncidente --> GestorIncidentes
+  PanelDetalleIncidente --> GestorIncidentes
+  PanelReportes        --> GestorReportes
+}
+
+@enduml
