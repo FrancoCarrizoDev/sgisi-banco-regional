@@ -1,4 +1,16 @@
 package com.bancoregio.sgisi.modelo.estado;
+
 import java.util.Set;
-/** Estado detectado. */
-public class EstadoDetectado extends EstadoIncidenteState { public String getNombre(){return "DETECTADO";} public Set<String> getTransicionesValidas(){ return Set.of("EN_ANALISIS","FALSO_POSITIVO"); } }
+
+/**
+ * Estado detectado.
+ */
+public class EstadoDetectado extends EstadoIncidenteState {
+    public String getNombre() {
+        return "DETECTADO";
+    }
+
+    public Set<String> getTransicionesValidas() {
+        return Set.of("EN_ANALISIS", "FALSO_POSITIVO");
+    }
+}

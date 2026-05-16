@@ -2,14 +2,20 @@ package com.bancoregio.sgisi.presentacion;
 
 import com.bancoregio.sgisi.modelo.Usuario;
 import com.bancoregio.sgisi.servicio.AuthService;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/** Diálogo de login UC01. */
+/**
+ * Diálogo de login UC01.
+ */
 public class DialogLogin extends JDialog {
     private Usuario usuarioAutenticado;
-    /** Crea diálogo de autenticación. */
+
+    /**
+     * Crea diálogo de autenticación.
+     */
     public DialogLogin(Frame owner, AuthService authService) {
         super(owner, "Ingreso SGISI", true);
 
@@ -55,6 +61,11 @@ public class DialogLogin extends JDialog {
         setMinimumSize(new Dimension(420, getPreferredSize().height));
         setLocationRelativeTo(owner);
     }
-    /** Devuelve usuario autenticado o null. */
-    public Usuario getUsuarioAutenticado(){ return usuarioAutenticado; }
+
+    /**
+     * Devuelve usuario autenticado o null.
+     */
+    public Usuario getUsuarioAutenticado() {
+        return usuarioAutenticado;
+    }
 }

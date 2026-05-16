@@ -1,9 +1,15 @@
 package com.bancoregio.sgisi.modelo.estado;
 
-/** Fábrica para reconstruir estados persistidos. */
+/**
+ * Fábrica para reconstruir estados persistidos.
+ */
 public final class EstadoFactory {
-    private EstadoFactory() {}
-    /** Crea estado por nombre persistido. */
+    private EstadoFactory() {
+    }
+
+    /**
+     * Crea estado por nombre persistido.
+     */
     public static EstadoIncidenteState crear(String nombre) {
         return switch (nombre) {
             case "DETECTADO" -> new EstadoDetectado();

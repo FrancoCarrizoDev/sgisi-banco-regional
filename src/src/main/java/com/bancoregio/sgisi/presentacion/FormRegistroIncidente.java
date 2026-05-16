@@ -1,17 +1,25 @@
 package com.bancoregio.sgisi.presentacion;
 
-import com.bancoregio.sgisi.modelo.*;
+import com.bancoregio.sgisi.modelo.ActivoAfectado;
+import com.bancoregio.sgisi.modelo.NivelSeveridad;
+import com.bancoregio.sgisi.modelo.TipoIncidente;
+import com.bancoregio.sgisi.modelo.Usuario;
 import com.bancoregio.sgisi.servicio.CatalogoService;
 import com.bancoregio.sgisi.servicio.IncidenteService;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/** Formulario UC02 registrar incidente. */
+/**
+ * Formulario UC02 registrar incidente.
+ */
 public class FormRegistroIncidente extends JDialog {
-    /** Crea formulario de registro. */
-    public FormRegistroIncidente(Frame owner, CatalogoService catalogoService, IncidenteService incidenteService, Usuario usuario, Runnable onDone){
-        super(owner,"Registrar incidente",true);
+    /**
+     * Crea formulario de registro.
+     */
+    public FormRegistroIncidente(Frame owner, CatalogoService catalogoService, IncidenteService incidenteService, Usuario usuario, Runnable onDone) {
+        super(owner, "Registrar incidente", true);
 
         JPanel root = new JPanel(new BorderLayout(8, 10));
         root.setBorder(new EmptyBorder(14, 16, 12, 16));
@@ -21,10 +29,10 @@ public class FormRegistroIncidente extends JDialog {
         root.add(titulo, BorderLayout.NORTH);
 
         JPanel form = UiStyles.createFormPanel();
-        JComboBox<TipoIncidente> tipos=new JComboBox<>();
-        JComboBox<NivelSeveridad> severidades=new JComboBox<>();
-        JComboBox<ActivoAfectado> activos=new JComboBox<>();
-        JTextArea desc=new JTextArea(5, 24);
+        JComboBox<TipoIncidente> tipos = new JComboBox<>();
+        JComboBox<NivelSeveridad> severidades = new JComboBox<>();
+        JComboBox<ActivoAfectado> activos = new JComboBox<>();
+        JTextArea desc = new JTextArea(5, 24);
         desc.setLineWrap(true);
         desc.setWrapStyleWord(true);
         JScrollPane descScroll = new JScrollPane(desc);
@@ -36,7 +44,7 @@ public class FormRegistroIncidente extends JDialog {
 
         JLabel ayuda = new JLabel("Completá todos los campos antes de guardar.");
         ayuda.setForeground(new Color(90, 90, 90));
-        JButton guardar=new JButton("Guardar");
+        JButton guardar = new JButton("Guardar");
         JPanel acciones = new JPanel(new BorderLayout());
         acciones.add(ayuda, BorderLayout.WEST);
         JPanel rightButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -45,22 +53,22 @@ public class FormRegistroIncidente extends JDialog {
         root.add(acciones, BorderLayout.SOUTH);
         setContentPane(root);
 
-        try{
-            for(TipoIncidente t: catalogoService.listarTipos()) tipos.addItem(t);
-            for(NivelSeveridad s: catalogoService.listarSeveridades()) severidades.addItem(s);
-            for(ActivoAfectado a: catalogoService.listarActivos()) activos.addItem(a);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(this,e.getMessage(),"Error al cargar catálogos",JOptionPane.ERROR_MESSAGE);
+        try {
+            for (TipoIncidente t : catalogoService.listarTipos()) tipos.addItem(t);
+            for (NivelSeveridad s : catalogoService.listarSeveridades()) severidades.addItem(s);
+            for (ActivoAfectado a : catalogoService.listarActivos()) activos.addItem(a);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error al cargar catálogos", JOptionPane.ERROR_MESSAGE);
         }
 
-        guardar.addActionListener(e->{
-            try{
-                incidenteService.registrarIncidente((TipoIncidente)tipos.getSelectedItem(),(NivelSeveridad)severidades.getSelectedItem(),(ActivoAfectado)activos.getSelectedItem(),desc.getText(),usuario);
-                JOptionPane.showMessageDialog(this,"Incidente registrado correctamente.","Registro exitoso",JOptionPane.INFORMATION_MESSAGE);
+        guardar.addActionListener(e -> {
+            try {
+                incidenteService.registrarIncidente((TipoIncidente) tipos.getSelectedItem(), (NivelSeveridad) severidades.getSelectedItem(), (ActivoAfectado) activos.getSelectedItem(), desc.getText(), usuario);
+                JOptionPane.showMessageDialog(this, "Incidente registrado correctamente.", "Registro exitoso", JOptionPane.INFORMATION_MESSAGE);
                 onDone.run();
                 dispose();
-            } catch(Exception ex){
-                JOptionPane.showMessageDialog(this,ex.getMessage(),"No se pudo registrar el incidente",JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "No se pudo registrar el incidente", JOptionPane.ERROR_MESSAGE);
             }
         });
 
