@@ -22,58 +22,62 @@ skinparam arrow {
 }
 
 ' ================================================================
+' CAPA UTIL
+' ================================================================
+package "util" {
+  class ConexionDB <<Singleton>>
+  class HashUtil
+}
+
+' ================================================================
 ' CAPA DAO – Interfaces
 ' ================================================================
 package "dao" {
   interface IncidenteDAO
   interface UsuarioDAO
-  interface EvidenciaDAO
+  interface CatalogoDAO
   interface BitacoraDAO
   interface SlaDAO
-  class ConexionDB <<Singleton>>
 }
 
 ' ================================================================
 ' CAPA DAO – Implementaciones JDBC
 ' ================================================================
 package "dao.impl" {
-  class IncidenteDAOImpl
-  class UsuarioDAOImpl
-  class EvidenciaDAOImpl
-  class BitacoraDAOImpl
-  class SlaDAOImpl
+  class IncidenteJDBC
+  class UsuarioJDBC
+  class CatalogoJDBC
+  class BitacoraJDBC
+  class SlaJDBC
 
-  IncidenteDAOImpl ..|> IncidenteDAO
-  UsuarioDAOImpl   ..|> UsuarioDAO
-  EvidenciaDAOImpl ..|> EvidenciaDAO
-  BitacoraDAOImpl  ..|> BitacoraDAO
-  SlaDAOImpl       ..|> SlaDAO
+  IncidenteJDBC ..|> IncidenteDAO
+  UsuarioJDBC   ..|> UsuarioDAO
+  CatalogoJDBC  ..|> CatalogoDAO
+  BitacoraJDBC  ..|> BitacoraDAO
+  SlaJDBC       ..|> SlaDAO
 
-  IncidenteDAOImpl --> ConexionDB
-  UsuarioDAOImpl   --> ConexionDB
-  EvidenciaDAOImpl --> ConexionDB
-  BitacoraDAOImpl  --> ConexionDB
-  SlaDAOImpl       --> ConexionDB
+  IncidenteJDBC --> ConexionDB
+  UsuarioJDBC   --> ConexionDB
+  CatalogoJDBC  --> ConexionDB
+  BitacoraJDBC  --> ConexionDB
+  SlaJDBC       --> ConexionDB
 }
 
 ' ================================================================
 ' CAPA DE SERVICIO
 ' ================================================================
 package "servicio" {
-  class GestorIncidentes
-  class GestorUsuarios
+  class AuthService
+  class IncidenteService
+  class CatalogoService
   class GestorSLA
-  class GestorReportes
-  class ReporteGestion
 
-  GestorIncidentes --> IncidenteDAO
-  GestorIncidentes --> BitacoraDAO
-  GestorIncidentes --> GestorSLA
-  GestorUsuarios   --> UsuarioDAO
+  AuthService      --> UsuarioDAO
+  IncidenteService --> IncidenteDAO
+  IncidenteService --> BitacoraDAO
+  IncidenteService --> GestorSLA
+  CatalogoService  --> CatalogoDAO
   GestorSLA        --> SlaDAO
-  GestorSLA        --> IncidenteDAO
-  GestorReportes   --> IncidenteDAO
-  GestorReportes   ..> ReporteGestion : crea >
 }
 
 ' ================================================================
@@ -84,19 +88,18 @@ package "presentacion" {
   class DialogLogin
   class PanelListaIncidentes
   class FormRegistroIncidente
-  class PanelDetalleIncidente
-  class PanelReportes
+  class DialogCambioEstado
+  class UiStyles
 
-  VentanaPrincipal     --> DialogLogin
-  VentanaPrincipal     --> PanelListaIncidentes
-  VentanaPrincipal     --> PanelReportes
-  PanelListaIncidentes --> FormRegistroIncidente
-  PanelListaIncidentes --> PanelDetalleIncidente
-  DialogLogin          --> GestorUsuarios
-  PanelListaIncidentes --> GestorIncidentes
-  FormRegistroIncidente --> GestorIncidentes
-  PanelDetalleIncidente --> GestorIncidentes
-  PanelReportes        --> GestorReportes
+  VentanaPrincipal      --> PanelListaIncidentes
+  PanelListaIncidentes  --> FormRegistroIncidente
+  PanelListaIncidentes  --> DialogCambioEstado
+  DialogLogin           --> AuthService
+  PanelListaIncidentes  --> IncidenteService
+  PanelListaIncidentes  --> CatalogoService
+  FormRegistroIncidente --> IncidenteService
+  FormRegistroIncidente --> CatalogoService
+  DialogCambioEstado    --> IncidenteService
 }
 
 @enduml

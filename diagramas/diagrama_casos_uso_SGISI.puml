@@ -52,7 +52,7 @@ rectangle "SGISI – Sistema de Gestión de Incidentes de Seguridad Informática
 
   package "Auditoría y Administración" {
     usecase "UC10 – Consultar bitácora de auditoría\n[RF10]" as UC10
-    usecase "UC11 – Gestionar usuarios y roles"               as UC11
+    usecase "UC11 – Gestionar usuarios y roles\n[RF11]"       as UC11
   }
 }
 
