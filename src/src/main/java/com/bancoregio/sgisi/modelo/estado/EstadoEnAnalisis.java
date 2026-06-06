@@ -3,7 +3,7 @@ package com.bancoregio.sgisi.modelo.estado;
 import java.util.Set;
 
 /**
- * Estado en análisis.
+ * Estado donde el equipo evalúa si el evento es real y qué alcance tiene.
  */
 public class EstadoEnAnalisis extends EstadoIncidenteState {
     public String getNombre() {

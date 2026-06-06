@@ -10,34 +10,26 @@ import java.util.List;
 
 /**
  * Servicio de lectura de catálogos.
+ *
+ * Los catálogos son datos de apoyo para formularios y filtros: tipos de
+ * incidente, severidades y activos afectados. Esta capa mantiene a la UI
+ * separada del DAO aunque por ahora solo delegue consultas simples.
  */
 public class CatalogoService {
     private final CatalogoDAO dao;
 
-    /**
-     * Crea servicio de catálogos.
-     */
     public CatalogoService(CatalogoDAO dao) {
         this.dao = dao;
     }
 
-    /**
-     * Lista tipos de incidente.
-     */
     public List<TipoIncidente> listarTipos() throws SQLException {
         return dao.listarTipos();
     }
 
-    /**
-     * Lista severidades.
-     */
     public List<NivelSeveridad> listarSeveridades() throws SQLException {
         return dao.listarSeveridades();
     }
 
-    /**
-     * Lista activos afectados.
-     */
     public List<ActivoAfectado> listarActivos() throws SQLException {
         return dao.listarActivos();
     }

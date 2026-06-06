@@ -4,7 +4,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
- * Utilidad para hashing SHA-256.
+ * Utilidad para generar hashes de contraseñas.
+ *
+ * El sistema no compara contraseñas en texto plano contra la base de datos: se
+ * calcula SHA-256 y se busca el usuario por email + hash. Para un prototipo es
+ * suficiente, aunque en sistemas reales se suele usar hash con salt y un
+ * algoritmo específico para contraseñas.
  */
 public final class HashUtil {
     private HashUtil() {

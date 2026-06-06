@@ -6,7 +6,12 @@ import java.sql.DriverManager;
 import java.util.Properties;
 
 /**
- * Singleton de conexiones JDBC para SGISI.
+ * Punto central de configuración de conexiones JDBC.
+ *
+ * Aplica el patrón Singleton para cargar una sola vez los parámetros de conexión
+ * y exponerlos al resto de la aplicación. Cada llamada a getConnection abre una
+ * conexión nueva, lo que permite que los servicios manejen transacciones propias
+ * sin compartir estado entre operaciones.
  */
 public final class ConexionDB {
     private static ConexionDB instance;
@@ -22,13 +27,16 @@ public final class ConexionDB {
             }
         } catch (Exception ignored) {
         }
+        // Las variables de entorno tienen prioridad para facilitar pruebas o
+        // despliegues sin tocar el archivo application.properties.
         this.url = System.getenv().getOrDefault("SGISI_DB_URL", p.getProperty("db.url", "jdbc:mysql://localhost:3306/sgisi"));
         this.user = System.getenv().getOrDefault("SGISI_DB_USER", p.getProperty("db.user", "sgisi_app"));
         this.password = System.getenv().getOrDefault("SGISI_DB_PASSWORD", p.getProperty("db.password", "sgisi_app_pass"));
     }
 
     /**
-     * Devuelve singleton.
+     * Acceso sincronizado para inicializar la configuración una sola vez, incluso
+     * si la aplicación pidiera la conexión desde más de un hilo Swing.
      */
     public static synchronized ConexionDB getInstance() {
         if (instance == null) {
@@ -38,7 +46,8 @@ public final class ConexionDB {
     }
 
     /**
-     * Abre y devuelve conexión nueva.
+     * Abre una conexión nueva para que cada operación pueda controlar su propia
+     * transacción y cerrar recursos con try-with-resources.
      */
     public Connection getConnection() throws java.sql.SQLException {
         return DriverManager.getConnection(url, user, password);

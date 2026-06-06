@@ -3,7 +3,7 @@ package com.bancoregio.sgisi.modelo.estado;
 import java.util.Set;
 
 /**
- * Estado cerrado.
+ * Estado terminal: el incidente finalizó correctamente y no admite nuevos cambios.
  */
 public class EstadoCerrado extends EstadoIncidenteState {
     public String getNombre() {

@@ -13,17 +13,26 @@ import javax.swing.*;
 
 /**
  * Punto de entrada del prototipo SGISI.
+ *
+ * La clase arma manualmente las dependencias principales de la aplicación
+ * siguiendo una arquitectura por capas: la interfaz Swing usa servicios, los
+ * servicios usan DAOs y los DAOs acceden a la base de datos. Para este proyecto
+ * no se utiliza un framework de inyección de dependencias; por eso las
+ * implementaciones concretas se conectan aquí.
  */
 public class Main {
-    /**
-     * Arranca la app en flujo UC01 login.
-     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             UiStyles.applyLookAndFeel();
+
+            // Composición de objetos de la aplicación: se conectan servicios y DAOs
+            // una sola vez antes de abrir las ventanas.
             AuthService authService = new AuthService(new UsuarioJDBC());
             CatalogoService catalogoService = new CatalogoService(new CatalogoJDBC());
             IncidenteService incidenteService = new IncidenteService(new IncidenteJDBC(), new BitacoraJDBC(), new GestorSLA(new SlaJDBC()));
+
+            // El login es modal: el flujo queda detenido hasta que el usuario
+            // se autentica o cierra la ventana.
             DialogLogin login = new DialogLogin(null, authService);
             login.setVisible(true);
             if (login.getUsuarioAutenticado() != null) {

@@ -12,12 +12,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Formulario UC02 registrar incidente.
+ * Formulario modal del UC02 Registrar incidente.
+ *
+ * La pantalla carga catálogos para que el usuario seleccione valores válidos y
+ * envía los datos al servicio. El servicio se encarga de crear el incidente,
+ * calcular SLA, asignar estado inicial y registrar auditoría.
  */
 public class FormRegistroIncidente extends JDialog {
-    /**
-     * Crea formulario de registro.
-     */
     public FormRegistroIncidente(Frame owner, CatalogoService catalogoService, IncidenteService incidenteService, Usuario usuario, Runnable onDone) {
         super(owner, "Registrar incidente", true);
 
@@ -54,6 +55,8 @@ public class FormRegistroIncidente extends JDialog {
         setContentPane(root);
 
         try {
+            // Los combos se alimentan desde catálogos persistidos para evitar
+            // valores escritos a mano que no existan en la base.
             for (TipoIncidente t : catalogoService.listarTipos()) tipos.addItem(t);
             for (NivelSeveridad s : catalogoService.listarSeveridades()) severidades.addItem(s);
             for (ActivoAfectado a : catalogoService.listarActivos()) activos.addItem(a);
@@ -63,6 +66,8 @@ public class FormRegistroIncidente extends JDialog {
 
         guardar.addActionListener(e -> {
             try {
+                // Al finalizar se ejecuta onDone para que el panel llamador
+                // refresque su tabla sin acoplar este formulario a esa clase.
                 incidenteService.registrarIncidente((TipoIncidente) tipos.getSelectedItem(), (NivelSeveridad) severidades.getSelectedItem(), (ActivoAfectado) activos.getSelectedItem(), desc.getText(), usuario);
                 JOptionPane.showMessageDialog(this, "Incidente registrado correctamente.", "Registro exitoso", JOptionPane.INFORMATION_MESSAGE);
                 onDone.run();

@@ -6,11 +6,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * DAO de SLA.
+ * Contrato de acceso a datos para la configuración de SLA.
  */
 public interface SlaDAO {
     /**
-     * Busca SLA por severidad.
+     * Obtiene el plazo aplicable a una severidad para que el servicio calcule la
+     * fecha de vencimiento del incidente.
      */
     Optional<ConfiguracionSLA> buscarPorSeveridad(int severidadId) throws SQLException;
 }

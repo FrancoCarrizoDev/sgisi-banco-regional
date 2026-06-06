@@ -15,12 +15,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementación JDBC de incidentes.
+ * Implementación JDBC del DAO de incidentes.
+ *
+ * Esta clase concentra el SQL y el mapeo entre filas de la base y objetos del
+ * dominio. La capa de servicio no necesita saber cómo se hacen los JOIN ni cómo
+ * se reconstruyen catálogos y estados.
  */
 public class IncidenteJDBC implements IncidenteDAO {
-    /**
-     * {@inheritDoc}
-     */
     public int insertar(Incidente i, Connection c) throws SQLException {
         String sql = "INSERT INTO incidente(tipo_id,severidad_id,estado_id,activo_id,descripcion,fecha_deteccion,fecha_vencimiento_sla) VALUES(?,?,?,?,?,?,?)";
         try (var ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -39,9 +40,6 @@ public class IncidenteJDBC implements IncidenteDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void actualizarEstado(int incidenteId, int estadoId, LocalDateTime fechaCierre, Connection c) throws SQLException {
         try (var ps = c.prepareStatement("UPDATE incidente SET estado_id=?, fecha_cierre=? WHERE id=?")) {
             ps.setInt(1, estadoId);
@@ -52,18 +50,14 @@ public class IncidenteJDBC implements IncidenteDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Optional<Incidente> buscarPorId(int id) throws SQLException {
         List<Incidente> list = listarInterno(" WHERE i.id=? ", ps -> ps.setInt(1, id));
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<Incidente> listar(Integer estadoId, Integer severidadId) throws SQLException {
+        // Construcción dinámica del WHERE para aplicar solo los filtros elegidos
+        // por el usuario, manteniendo parámetros preparados para evitar SQL injection.
         String where = " WHERE 1=1 " + (estadoId != null ? " AND i.estado_id=?" : "") + (severidadId != null ? " AND i.severidad_id=?" : "");
         return listarInterno(where, ps -> {
             int idx = 1;
@@ -79,6 +73,8 @@ public class IncidenteJDBC implements IncidenteDAO {
             binder.bind(ps);
             try (var rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    // El resultado plano del JOIN se vuelve a convertir en un
+                    // objeto Incidente compuesto por catálogos y estado.
                     out.add(new Incidente(rs.getInt("id"), new TipoIncidente(rs.getInt("tipo_id"), rs.getString("tipo_nombre"), rs.getString("tipo_desc")), new NivelSeveridad(rs.getInt("sev_id"), rs.getString("sev_nombre"), rs.getInt("nivel_prioridad")), new ActivoAfectado(rs.getInt("act_id"), rs.getString("act_nombre"), rs.getString("act_tipo"), rs.getString("act_desc")), rs.getString("descripcion"), rs.getTimestamp("fecha_deteccion").toLocalDateTime(), rs.getTimestamp("fecha_vencimiento_sla").toLocalDateTime(), rs.getTimestamp("fecha_cierre") != null ? rs.getTimestamp("fecha_cierre").toLocalDateTime() : null, EstadoFactory.crear(rs.getString("estado_nombre"))));
                 }
             }
@@ -87,7 +83,8 @@ public class IncidenteJDBC implements IncidenteDAO {
     }
 
     /**
-     * Devuelve el id de estado por nombre.
+     * Traduce el nombre de estado usado por el dominio al id requerido por la
+     * clave foránea de la tabla incidente.
      */
     public int estadoIdPorNombre(String nombre, Connection c) throws SQLException {
         try (var ps = c.prepareStatement("SELECT id FROM estado_incidente WHERE nombre=?")) {

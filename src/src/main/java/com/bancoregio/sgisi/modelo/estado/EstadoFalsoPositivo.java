@@ -3,7 +3,7 @@ package com.bancoregio.sgisi.modelo.estado;
 import java.util.Set;
 
 /**
- * Estado falso positivo.
+ * Estado terminal para eventos que se analizaron y no resultaron incidentes reales.
  */
 public class EstadoFalsoPositivo extends EstadoIncidenteState {
     public String getNombre() {

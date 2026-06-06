@@ -5,14 +5,18 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Utilidades visuales simples para mantener consistencia en la UI Swing.
+ * Utilidades compartidas de la interfaz Swing.
+ *
+ * Evita repetir configuración visual en cada ventana y concentra decisiones de
+ * estilo simples, como Look & Feel, márgenes y estructura de formularios.
  */
 public final class UiStyles {
     private UiStyles() {
     }
 
     /**
-     * Aplica un Look & Feel estándar priorizando Nimbus si está disponible.
+     * Aplica un Look & Feel estándar priorizando Nimbus para que la aplicación se
+     * vea más uniforme entre sistemas operativos.
      */
     public static void applyLookAndFeel() {
         try {
@@ -29,7 +33,8 @@ public final class UiStyles {
     }
 
     /**
-     * Crea un panel con GridBagLayout para formularios alineados por filas.
+     * Crea un panel preparado para formularios de dos columnas: etiqueta y campo.
+     * GridBagLayout permite alinear filas sin fijar tamaños absolutos.
      */
     public static JPanel createFormPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -45,7 +50,8 @@ public final class UiStyles {
     }
 
     /**
-     * Agrega una fila etiqueta+componente a un formulario GridBag.
+     * Encapsula la configuración repetitiva de GridBagConstraints para que los
+     * formularios mantengan la misma separación y alineación.
      */
     public static void addFormRow(JPanel panel, int row, String label, JComponent field) {
         GridBagConstraints gbc = new GridBagConstraints();

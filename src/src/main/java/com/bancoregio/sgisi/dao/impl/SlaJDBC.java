@@ -8,12 +8,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * Implementación JDBC de SLA.
+ * Implementación JDBC de la configuración de SLA.
+ *
+ * Obtiene el plazo definido para una severidad. El cálculo de la fecha final se
+ * mantiene fuera del DAO porque pertenece a la lógica de negocio.
  */
 public class SlaJDBC implements SlaDAO {
-    /**
-     * {@inheritDoc}
-     */
     public Optional<ConfiguracionSLA> buscarPorSeveridad(int severidadId) throws SQLException {
         try (var c = ConexionDB.getInstance().getConnection(); var ps = c.prepareStatement("SELECT id,severidad_id,plazo_horas,descripcion FROM configuracion_sla WHERE severidad_id=?")) {
             ps.setInt(1, severidadId);

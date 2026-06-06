@@ -13,7 +13,11 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Panel de UC08 listado y accesos a UC02/UC04.
+ * Panel principal de trabajo del sistema.
+ *
+ * Implementa el UC08 de listado de incidentes y desde la misma pantalla permite
+ * acceder a UC02 Registrar incidente y UC04 Cambiar estado. La tabla muestra una
+ * vista resumida del dominio; las operaciones reales se delegan a servicios.
  */
 public class PanelListaIncidentes extends JPanel {
     private final IncidenteService incidenteService;
@@ -24,9 +28,6 @@ public class PanelListaIncidentes extends JPanel {
     private final DefaultTableModel model = new DefaultTableModel(new Object[]{"ID", "Tipo", "Severidad", "Estado", "Activo", "SLA"}, 0);
     private final JTable tabla = new JTable(model);
 
-    /**
-     * Crea panel de listado.
-     */
     public PanelListaIncidentes(IncidenteService incidenteService, CatalogoService catalogoService, Usuario usuario) {
         this.incidenteService = incidenteService;
         this.catalogoService = catalogoService;
@@ -54,6 +55,8 @@ public class PanelListaIncidentes extends JPanel {
         top.add(barra, BorderLayout.CENTER);
         add(top, BorderLayout.NORTH);
 
+        // La JTable actúa como vista de solo lectura del listado. El modelo se
+        // reconstruye al aplicar filtros o al volver de un alta/cambio de estado.
         tabla.setRowHeight(24);
         tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabla.setFillsViewportHeight(true);
@@ -75,6 +78,9 @@ public class PanelListaIncidentes extends JPanel {
 
     private void cargarCombos() {
         try {
+            // Los estados se muestran con el id usado por la base de datos para
+            // poder convertir fácilmente la selección en filtro. Las severidades
+            // se cargan desde catálogo porque pueden variar.
             cbEstado.addItem("TODOS");
             cbEstado.addItem("1-DETECTADO");
             cbEstado.addItem("2-EN_ANALISIS");
@@ -98,6 +104,8 @@ public class PanelListaIncidentes extends JPanel {
         try {
             List<Incidente> list = incidenteService.listarIncidentes(selectedId(cbEstado), selectedId(cbSeveridad));
             model.setRowCount(0);
+            // Se transforma el objeto de dominio Incidente en columnas visibles
+            // para el usuario. La tabla no guarda lógica de negocio.
             for (Incidente i : list)
                 model.addRow(new Object[]{i.getId(), i.getTipo().nombre(), i.getSeveridad().nombre(), i.getEstado().getNombre(), i.getActivo().nombre(), i.getFechaVencimientoSla()});
         } catch (Exception e) {
@@ -106,6 +114,9 @@ public class PanelListaIncidentes extends JPanel {
     }
 
     private void abrirCambioEstado() {
+        // Si hay una fila seleccionada se usa su ID. Si no, se permite ingresar
+        // manualmente el ID para cubrir el caso de que el usuario conozca el
+        // incidente pero no lo tenga seleccionado.
         int selectedRow = tabla.getSelectedRow();
         Integer incidenteId = null;
         if (selectedRow >= 0) {

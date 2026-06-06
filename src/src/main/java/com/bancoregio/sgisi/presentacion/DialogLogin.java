@@ -8,14 +8,15 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Diálogo de login UC01.
+ * Diálogo modal del UC01 Login.
+ *
+ * Es parte de la capa de presentación: solo arma la pantalla, captura los datos
+ * ingresados y delega la autenticación a AuthService. No conoce consultas SQL ni
+ * reglas de hash de contraseñas.
  */
 public class DialogLogin extends JDialog {
     private Usuario usuarioAutenticado;
 
-    /**
-     * Crea diálogo de autenticación.
-     */
     public DialogLogin(Frame owner, AuthService authService) {
         super(owner, "Ingreso SGISI", true);
 
@@ -44,6 +45,9 @@ public class DialogLogin extends JDialog {
             try {
                 String correo = email.getText().trim();
                 String clave = new String(pass.getPassword());
+
+                // La ventana solo decide qué hacer con el resultado; la regla
+                // de autenticación queda encapsulada en el servicio.
                 usuarioAutenticado = authService.autenticar(correo, clave);
                 if (usuarioAutenticado != null) {
                     dispose();
@@ -62,9 +66,6 @@ public class DialogLogin extends JDialog {
         setLocationRelativeTo(owner);
     }
 
-    /**
-     * Devuelve usuario autenticado o null.
-     */
     public Usuario getUsuarioAutenticado() {
         return usuarioAutenticado;
     }

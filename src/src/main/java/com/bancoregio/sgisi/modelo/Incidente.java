@@ -5,7 +5,12 @@ import com.bancoregio.sgisi.modelo.estado.EstadoIncidenteState;
 import java.time.LocalDateTime;
 
 /**
- * Entidad incidente del SGISI.
+ * Entidad central del dominio SGISI.
+ *
+ * Representa un incidente de seguridad con su clasificación, activo afectado,
+ * fechas de seguimiento y estado actual. El estado se modela como objeto
+ * EstadoIncidenteState para aplicar el patrón State en lugar de manejar el ciclo
+ * de vida con condicionales dispersos.
  */
 public class Incidente {
     private Integer id;
@@ -18,9 +23,6 @@ public class Incidente {
     private LocalDateTime fechaCierre;
     private EstadoIncidenteState estado;
 
-    /**
-     * Crea un incidente.
-     */
     public Incidente(Integer id, TipoIncidente tipo, NivelSeveridad severidad, ActivoAfectado activo, String descripcion, LocalDateTime fechaDeteccion, LocalDateTime fechaVencimientoSla, LocalDateTime fechaCierre, EstadoIncidenteState estado) {
         this.id = id;
         this.tipo = tipo;
@@ -33,86 +35,50 @@ public class Incidente {
         this.estado = estado;
     }
 
-    /**
-     * Devuelve id.
-     */
     public Integer getId() {
         return id;
     }
 
-    /**
-     * Define id.
-     */
     public void setId(Integer id) {
         this.id = id;
     }
 
-    /**
-     * Devuelve tipo.
-     */
     public TipoIncidente getTipo() {
         return tipo;
     }
 
-    /**
-     * Devuelve severidad.
-     */
     public NivelSeveridad getSeveridad() {
         return severidad;
     }
 
-    /**
-     * Devuelve activo.
-     */
     public ActivoAfectado getActivo() {
         return activo;
     }
 
-    /**
-     * Devuelve descripcion.
-     */
     public String getDescripcion() {
         return descripcion;
     }
 
-    /**
-     * Devuelve fecha detección.
-     */
     public LocalDateTime getFechaDeteccion() {
         return fechaDeteccion;
     }
 
-    /**
-     * Devuelve SLA.
-     */
     public LocalDateTime getFechaVencimientoSla() {
         return fechaVencimientoSla;
     }
 
-    /**
-     * Devuelve cierre.
-     */
     public LocalDateTime getFechaCierre() {
         return fechaCierre;
     }
 
-    /**
-     * Define cierre.
-     */
     public void setFechaCierre(LocalDateTime fechaCierre) {
         this.fechaCierre = fechaCierre;
     }
 
-    /**
-     * Devuelve estado actual.
-     */
     public EstadoIncidenteState getEstado() {
         return estado;
     }
 
-    /**
-     * Define estado actual.
-     */
     public void setEstado(EstadoIncidenteState estado) {
         this.estado = estado;
     }

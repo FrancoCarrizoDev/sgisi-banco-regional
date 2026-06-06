@@ -8,12 +8,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Diálogo UC04 cambiar estado.
+ * Diálogo modal del UC04 Cambiar estado.
+ *
+ * Muestra únicamente los estados destino permitidos por el estado actual del
+ * incidente. De esta manera la interfaz acompaña la regla del dominio y reduce
+ * la posibilidad de solicitar transiciones inválidas.
  */
 public class DialogCambioEstado extends JDialog {
-    /**
-     * Crea diálogo de cambio de estado.
-     */
     public DialogCambioEstado(Frame owner, IncidenteService service, Usuario usuario, int incidenteId, Runnable onDone) {
         super(owner, "Cambiar estado", true);
 
@@ -35,6 +36,8 @@ public class DialogCambioEstado extends JDialog {
         setContentPane(root);
 
         try {
+            // Las transiciones salen del patrón State. La UI no mantiene una
+            // matriz propia de estados válidos.
             for (String t : service.obtenerPorId(incidenteId).getEstado().getTransicionesValidas()) destino.addItem(t);
             if (destino.getItemCount() == 0) {
                 ok.setEnabled(false);
@@ -47,6 +50,8 @@ public class DialogCambioEstado extends JDialog {
 
         ok.addActionListener(e -> {
             try {
+                // El servicio vuelve a validar la transición antes de persistir,
+                // aunque la UI ya haya limitado las opciones visibles.
                 service.cambiarEstado(incidenteId, String.valueOf(destino.getSelectedItem()), obs.getText().trim(), usuario);
                 JOptionPane.showMessageDialog(this, "Estado actualizado correctamente.", "Cambio aplicado", JOptionPane.INFORMATION_MESSAGE);
                 onDone.run();

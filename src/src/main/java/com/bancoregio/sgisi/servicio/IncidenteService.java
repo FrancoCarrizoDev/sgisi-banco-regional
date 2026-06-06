@@ -13,16 +13,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Servicio principal para UC02, UC04 y UC08.
+ * Servicio principal de incidentes para UC02, UC04 y UC08.
+ *
+ * Representa la capa de negocio: recibe datos ya capturados por la UI, aplica
+ * reglas del dominio como cálculo de SLA y validación de transiciones de estado,
+ * y coordina a los DAOs para persistir incidentes y bitácora. Mantener esta
+ * lógica aquí evita que las ventanas Swing dependan directamente de SQL.
  */
 public class IncidenteService {
     private final IncidenteDAO incidenteDAO;
     private final BitacoraDAO bitacoraDAO;
     private final GestorSLA gestorSLA;
 
-    /**
-     * Crea servicio de incidentes.
-     */
     public IncidenteService(IncidenteDAO incidenteDAO, BitacoraDAO bitacoraDAO, GestorSLA gestorSLA) {
         this.incidenteDAO = incidenteDAO;
         this.bitacoraDAO = bitacoraDAO;
@@ -30,7 +32,11 @@ public class IncidenteService {
     }
 
     /**
-     * Registra incidente y bitácora en una sola transacción.
+     * Registra un incidente nuevo en estado inicial DETECTADO.
+     *
+     * La operación persiste dos cosas que deben quedar sincronizadas: el
+     * incidente y la entrada de auditoría. Por eso se usa una transacción manual:
+     * si falla cualquiera de los pasos, se hace rollback y no quedan datos a medias.
      */
     public Incidente registrarIncidente(TipoIncidente tipo, NivelSeveridad sev, ActivoAfectado act, String descripcion, Usuario usuario) throws SQLException {
         LocalDateTime deteccion = LocalDateTime.now();
@@ -54,7 +60,13 @@ public class IncidenteService {
     }
 
     /**
-     * Cambia estado validando transición desde state actual.
+     * Cambia el estado de un incidente respetando el ciclo de vida definido por
+     * el patrón State.
+     *
+     * Primero se reconstruye el incidente actual desde la base de datos, luego se
+     * consulta al objeto estado si el destino es válido. Si el cambio corresponde
+     * a CERRADO, también se registra fecha de cierre. El cambio de estado y la
+     * bitácora se guardan en la misma transacción.
      */
     public Incidente cambiarEstado(int incidenteId, String destino, String observacion, Usuario usuario) throws SQLException {
         Incidente i = incidenteDAO.buscarPorId(incidenteId).orElseThrow(() -> new IllegalArgumentException("Incidente no existe"));
@@ -80,7 +92,8 @@ public class IncidenteService {
     }
 
     /**
-     * Lista incidentes con filtros opcionales.
+     * Devuelve el listado para UC08. Los filtros son opcionales: null significa
+     * que ese criterio no se aplica.
      */
     public List<Incidente> listarIncidentes(Integer estadoId, Integer severidadId) throws SQLException {
         return incidenteDAO.listar(estadoId, severidadId);

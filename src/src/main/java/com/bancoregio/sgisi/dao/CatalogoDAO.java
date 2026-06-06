@@ -8,21 +8,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * DAO de catálogos.
+ * Contrato de acceso a datos para catálogos del sistema.
+ *
+ * Los catálogos alimentan formularios y filtros, por eso se consultan como listas
+ * de lectura sin reglas de negocio complejas.
  */
 public interface CatalogoDAO {
-    /**
-     * Lista tipos de incidente.
-     */
     List<TipoIncidente> listarTipos() throws SQLException;
 
-    /**
-     * Lista severidades.
-     */
     List<NivelSeveridad> listarSeveridades() throws SQLException;
 
-    /**
-     * Lista activos afectados.
-     */
     List<ActivoAfectado> listarActivos() throws SQLException;
 }

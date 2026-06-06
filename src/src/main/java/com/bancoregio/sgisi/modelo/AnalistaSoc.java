@@ -1,12 +1,9 @@
 package com.bancoregio.sgisi.modelo;
 
 /**
- * Usuario con rol analista SOC.
+ * Especialización de Usuario para operadores que registran y gestionan incidentes.
  */
 public class AnalistaSoc extends Usuario {
-    /**
-     * Crea analista.
-     */
     public AnalistaSoc(int id, String n, String a, String e) {
         super(id, n, a, e, "ANALISTA_SOC");
     }

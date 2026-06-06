@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * DAO de usuarios.
+ * Contrato de acceso a datos para usuarios.
+ *
+ * Expone solo la operación necesaria para autenticar: buscar un usuario activo
+ * por email y hash de contraseña.
  */
 public interface UsuarioDAO {
-    /**
-     * Busca usuario activo por email y hash.
-     */
     Optional<Usuario> buscarActivoPorEmailYHash(String email, String hash) throws SQLException;
 }

@@ -3,7 +3,7 @@ package com.bancoregio.sgisi.modelo.estado;
 import java.util.Set;
 
 /**
- * Estado detectado.
+ * Estado inicial: el incidente fue reportado, pero todavía no se analizó.
  */
 public class EstadoDetectado extends EstadoIncidenteState {
     public String getNombre() {
