@@ -2,7 +2,6 @@ package com.bancoregio.sgisi.servicio;
 
 import com.bancoregio.sgisi.dao.BitacoraDAO;
 import com.bancoregio.sgisi.dao.IncidenteDAO;
-import com.bancoregio.sgisi.dao.impl.IncidenteJDBC;
 import com.bancoregio.sgisi.modelo.*;
 import com.bancoregio.sgisi.modelo.estado.EstadoDetectado;
 import com.bancoregio.sgisi.modelo.estado.EstadoFactory;
@@ -74,7 +73,7 @@ public class IncidenteService {
         try (var c = ConexionDB.getInstance().getConnection()) {
             c.setAutoCommit(false);
             try {
-                int estadoId = ((IncidenteJDBC) incidenteDAO).estadoIdPorNombre(destino, c);
+                int estadoId = incidenteDAO.estadoIdPorNombre(destino, c);
                 LocalDateTime cierre = "CERRADO".equals(destino) ? LocalDateTime.now() : null;
                 incidenteDAO.actualizarEstado(incidenteId, estadoId, cierre, c);
                 bitacoraDAO.insertar(new EntradaBitacora(null, incidenteId, usuario.getId(), LocalDateTime.now(), "CAMBIO_ESTADO", observacion), c);

@@ -37,4 +37,11 @@ public interface IncidenteDAO {
      * Lista incidentes con filtros opcionales usados por la pantalla principal.
      */
     List<Incidente> listar(Integer estadoId, Integer severidadId) throws SQLException;
+
+    /**
+     * Traduce el nombre de estado del dominio al id de la clave foránea, dentro de
+     * la conexión transaccional recibida. Forma parte del contrato para que la capa
+     * de negocio dependa solo de la abstracción y no de la implementación concreta.
+     */
+    int estadoIdPorNombre(String nombre, Connection connection) throws SQLException;
 }
