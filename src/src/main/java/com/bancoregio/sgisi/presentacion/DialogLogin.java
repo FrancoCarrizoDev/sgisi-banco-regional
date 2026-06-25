@@ -9,7 +9,7 @@ import java.awt.*;
 
 /**
  * Diálogo modal del UC01 Login.
- *
+ * <p>
  * Es parte de la capa de presentación: solo arma la pantalla, captura los datos
  * ingresados y delega la autenticación a AuthService. No conoce consultas SQL ni
  * reglas de hash de contraseñas.

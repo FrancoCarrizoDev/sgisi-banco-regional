@@ -2,7 +2,7 @@ package com.bancoregio.sgisi.modelo.estado;
 
 /**
  * Fábrica para reconstruir objetos de estado desde la base de datos.
- *
+ * <p>
  * En la tabla se guarda el nombre del estado, pero en memoria el incidente usa
  * objetos que conocen sus transiciones. Esta clase traduce el valor persistido al
  * objeto correspondiente del patrón State.

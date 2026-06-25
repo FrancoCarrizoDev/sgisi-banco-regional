@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 /**
  * Servicio de autenticación del UC01.
- *
+ * <p>
  * Centraliza la regla de login para que la pantalla no tenga que conocer cómo
  * se valida la contraseña ni cómo se consulta la base de datos. La UI entrega
  * email y contraseña en texto plano; el servicio transforma la contraseña a hash

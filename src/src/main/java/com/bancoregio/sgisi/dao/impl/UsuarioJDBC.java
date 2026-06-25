@@ -3,6 +3,7 @@ package com.bancoregio.sgisi.dao.impl;
 import com.bancoregio.sgisi.dao.UsuarioDAO;
 import com.bancoregio.sgisi.modelo.Administrador;
 import com.bancoregio.sgisi.modelo.AnalistaSoc;
+import com.bancoregio.sgisi.modelo.RolUsuario;
 import com.bancoregio.sgisi.modelo.SupervisorSeguridad;
 import com.bancoregio.sgisi.modelo.Usuario;
 import com.bancoregio.sgisi.util.ConexionDB;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 /**
  * Implementación JDBC del DAO de usuarios.
- *
+ * <p>
  * Además de consultar credenciales, reconstruye la subclase de Usuario según el
  * rol persistido. Así el resto del sistema trabaja con objetos del dominio y no
  * con filas de la tabla usuario.
@@ -29,12 +30,12 @@ public class UsuarioJDBC implements UsuarioDAO {
                 String n = rs.getString("nombre");
                 String a = rs.getString("apellido");
                 String e = rs.getString("email");
-                String r = rs.getString("rol");
+                RolUsuario rol = RolUsuario.desdeCodigo(rs.getString("rol"));
                 // El rol define qué especialización de Usuario se crea en memoria.
-                return Optional.of(switch (r) {
-                    case "ANALISTA_SOC" -> new AnalistaSoc(id, n, a, e);
-                    case "SUPERVISOR_SEGURIDAD" -> new SupervisorSeguridad(id, n, a, e);
-                    default -> new Administrador(id, n, a, e);
+                return Optional.of(switch (rol) {
+                    case ANALISTA_SOC -> new AnalistaSoc(id, n, a, e);
+                    case SUPERVISOR_SEGURIDAD -> new SupervisorSeguridad(id, n, a, e);
+                    case ADMINISTRADOR -> new Administrador(id, n, a, e);
                 });
             }
         }

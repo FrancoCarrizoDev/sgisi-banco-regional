@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 /**
  * Implementación JDBC de la bitácora de auditoría.
- *
+ * <p>
  * Se usa desde los servicios para dejar trazabilidad de acciones importantes,
  * como registrar incidentes o cambiar estados.
  */

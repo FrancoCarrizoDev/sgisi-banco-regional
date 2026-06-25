@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Implementación JDBC del DAO de incidentes.
- *
+ * <p>
  * Esta clase concentra el SQL y el mapeo entre filas de la base y objetos del
  * dominio. La capa de servicio no necesita saber cómo se hacen los JOIN ni cómo
  * se reconstruyen catálogos y estados.

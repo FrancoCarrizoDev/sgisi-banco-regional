@@ -7,7 +7,7 @@ import java.util.Properties;
 
 /**
  * Punto central de configuración de conexiones JDBC.
- *
+ * <p>
  * Aplica el patrón Singleton para cargar una sola vez los parámetros de conexión
  * y exponerlos al resto de la aplicación. Cada llamada a getConnection abre una
  * conexión nueva, lo que permite que los servicios manejen transacciones propias

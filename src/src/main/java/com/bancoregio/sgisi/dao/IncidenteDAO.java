@@ -10,7 +10,7 @@ import java.util.Optional;
 
 /**
  * Contrato de acceso a datos para incidentes.
- *
+ * <p>
  * El DAO separa la lógica de negocio del detalle de persistencia. Los servicios
  * trabajan contra esta interfaz y no contra SQL directo, lo que hace más clara la
  * división entre reglas del sistema y almacenamiento.

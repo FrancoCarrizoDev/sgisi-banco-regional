@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 /**
  * Componente de negocio encargado del SLA.
- *
+ * <p>
  * Traduce la severidad de un incidente en una fecha límite de atención. El plazo
  * no está fijo en código: se obtiene desde la tabla de configuración de SLA para
  * que el criterio pueda cambiar sin modificar la aplicación.

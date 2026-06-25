@@ -9,7 +9,7 @@ import java.awt.*;
 
 /**
  * Diálogo modal del UC04 Cambiar estado.
- *
+ * <p>
  * Muestra únicamente los estados destino permitidos por el estado actual del
  * incidente. De esta manera la interfaz acompaña la regla del dominio y reduce
  * la posibilidad de solicitar transiciones inválidas.

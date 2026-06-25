@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Implementación JDBC de catálogos.
- *
+ * <p>
  * Lee tablas maestras usadas por la interfaz. Como son datos simples de apoyo,
  * cada método ejecuta una consulta directa y transforma cada fila en un record
  * inmutable del modelo.

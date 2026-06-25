@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Servicio principal de incidentes para UC02, UC04 y UC08.
- *
+ * <p>
  * Representa la capa de negocio: recibe datos ya capturados por la UI, aplica
  * reglas del dominio como cálculo de SLA y validación de transiciones de estado,
  * y coordina a los DAOs para persistir incidentes y bitácora. Mantener esta
@@ -32,7 +32,7 @@ public class IncidenteService {
 
     /**
      * Registra un incidente nuevo en estado inicial DETECTADO.
-     *
+     * <p>
      * La operación persiste dos cosas que deben quedar sincronizadas: el
      * incidente y la entrada de auditoría. Por eso se usa una transacción manual:
      * si falla cualquiera de los pasos, se hace rollback y no quedan datos a medias.
@@ -61,7 +61,7 @@ public class IncidenteService {
     /**
      * Cambia el estado de un incidente respetando el ciclo de vida definido por
      * el patrón State.
-     *
+     * <p>
      * Primero se reconstruye el incidente actual desde la base de datos, luego se
      * consulta al objeto estado si el destino es válido. Si el cambio corresponde
      * a CERRADO, también se registra fecha de cierre. El cambio de estado y la

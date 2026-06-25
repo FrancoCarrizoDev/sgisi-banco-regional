@@ -6,7 +6,7 @@ import java.awt.*;
 
 /**
  * Utilidades compartidas de la interfaz Swing.
- *
+ * <p>
  * Evita repetir configuración visual en cada ventana y concentra decisiones de
  * estilo simples, como Look & Feel, márgenes y estructura de formularios.
  */

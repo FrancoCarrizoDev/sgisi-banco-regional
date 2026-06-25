@@ -9,7 +9,7 @@ import java.util.Optional;
 
 /**
  * Implementación JDBC de la configuración de SLA.
- *
+ * <p>
  * Obtiene el plazo definido para una severidad. El cálculo de la fecha final se
  * mantiene fuera del DAO porque pertenece a la lógica de negocio.
  */

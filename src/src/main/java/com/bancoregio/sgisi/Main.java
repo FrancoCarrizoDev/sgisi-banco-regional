@@ -13,7 +13,7 @@ import javax.swing.*;
 
 /**
  * Punto de entrada del prototipo SGISI.
- *
+ * <p>
  * La clase arma manualmente las dependencias principales de la aplicación
  * siguiendo una arquitectura por capas: la interfaz Swing usa servicios, los
  * servicios usan DAOs y los DAOs acceden a la base de datos. Para este proyecto

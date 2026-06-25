@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Panel principal de trabajo del sistema.
- *
+ * <p>
  * Implementa el UC08 de listado de incidentes y desde la misma pantalla permite
  * acceder a UC02 Registrar incidente y UC04 Cambiar estado. La tabla muestra una
  * vista resumida del dominio; las operaciones reales se delegan a servicios.

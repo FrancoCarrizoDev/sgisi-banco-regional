@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Contrato de acceso a datos para catálogos del sistema.
- *
+ * <p>
  * Los catálogos alimentan formularios y filtros, por eso se consultan como listas
  * de lectura sin reglas de negocio complejas.
  */

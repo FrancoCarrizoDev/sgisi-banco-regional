@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 /**
  * Entidad central del dominio SGISI.
- *
+ * <p>
  * Representa un incidente de seguridad con su clasificación, activo afectado,
  * fechas de seguimiento y estado actual. El estado se modela como objeto
  * EstadoIncidenteState para aplicar el patrón State en lugar de manejar el ciclo

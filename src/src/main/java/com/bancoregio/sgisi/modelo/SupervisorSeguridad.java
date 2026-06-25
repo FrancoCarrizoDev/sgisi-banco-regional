@@ -5,6 +5,6 @@ package com.bancoregio.sgisi.modelo;
  */
 public class SupervisorSeguridad extends Usuario {
     public SupervisorSeguridad(int id, String n, String a, String e) {
-        super(id, n, a, e, "SUPERVISOR_SEGURIDAD");
+        super(id, n, a, e, RolUsuario.SUPERVISOR_SEGURIDAD);
     }
 }

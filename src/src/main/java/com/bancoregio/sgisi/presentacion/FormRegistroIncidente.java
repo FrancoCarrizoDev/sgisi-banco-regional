@@ -13,7 +13,7 @@ import java.awt.*;
 
 /**
  * Formulario modal del UC02 Registrar incidente.
- *
+ * <p>
  * La pantalla carga catálogos para que el usuario seleccione valores válidos y
  * envía los datos al servicio. El servicio se encarga de crear el incidente,
  * calcular SLA, asignar estado inicial y registrar auditoría.

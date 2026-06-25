@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * Servicio de lectura de catálogos.
- *
+ * <p>
  * Los catálogos son datos de apoyo para formularios y filtros: tipos de
  * incidente, severidades y activos afectados. Esta capa mantiene a la UI
  * separada del DAO aunque por ahora solo delegue consultas simples.

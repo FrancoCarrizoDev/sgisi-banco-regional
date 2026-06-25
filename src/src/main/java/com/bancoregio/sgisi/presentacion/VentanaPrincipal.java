@@ -9,7 +9,7 @@ import java.awt.*;
 
 /**
  * Ventana principal de SGISI luego del login.
- *
+ * <p>
  * Funciona como contenedor Swing de alto nivel. La lógica concreta de listado,
  * filtros y acciones se delega al panel principal para mantener esta clase simple.
  */

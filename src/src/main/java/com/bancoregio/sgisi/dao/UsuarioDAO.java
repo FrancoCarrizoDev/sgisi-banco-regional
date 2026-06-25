@@ -7,7 +7,7 @@ import java.util.Optional;
 
 /**
  * Contrato de acceso a datos para usuarios.
- *
+ * <p>
  * Expone solo la operación necesaria para autenticar: buscar un usuario activo
  * por email y hash de contraseña.
  */

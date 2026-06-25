@@ -2,7 +2,7 @@ package com.bancoregio.sgisi.modelo;
 
 /**
  * Clase base para los usuarios del sistema.
- *
+ * <p>
  * Permite representar roles específicos mediante subclases, manteniendo campos
  * comunes como identidad, email y rol. En este prototipo las subclases no agregan
  * comportamiento propio, pero hacen explícita la clasificación de usuarios del
@@ -13,9 +13,9 @@ public abstract class Usuario {
     private final String nombre;
     private final String apellido;
     private final String email;
-    private final String rol;
+    private final RolUsuario rol;
 
-    public Usuario(int id, String nombre, String apellido, String email, String rol) {
+    public Usuario(int id, String nombre, String apellido, String email, RolUsuario rol) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -39,7 +39,7 @@ public abstract class Usuario {
         return email;
     }
 
-    public String getRol() {
+    public RolUsuario getRol() {
         return rol;
     }
 

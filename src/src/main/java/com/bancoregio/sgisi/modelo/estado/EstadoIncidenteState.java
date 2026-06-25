@@ -4,7 +4,7 @@ import java.util.Set;
 
 /**
  * Base del patrón State para el ciclo de vida de incidentes.
- *
+ * <p>
  * Cada subclase representa un estado real del negocio y declara a qué estados se
  * puede avanzar. Así la validación de transiciones queda cerca del estado actual
  * y no repartida en if/switch dentro del servicio o de la interfaz.
